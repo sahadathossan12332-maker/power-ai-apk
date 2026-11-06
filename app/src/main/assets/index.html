@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Power AI — Created by Sahadat Hossan</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --panel: #131a2a;
+    --accent: #6366f1;
+    --accent2: #06b6d4;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --border: #1e293b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+  header {
+    background: linear-gradient(90deg, #111827, #1e1b4b);
+    padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .logo {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 18px;
+  }
+  .title h1 { font-size: 17px; font-weight: 700; }
+  .title p { font-size: 11px; color: #38bdf8; }
+  .settings-btn {
+    background: #1e293b; color: var(--text); border: 1px solid #334155;
+    padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;
+  }
+  .quick-tools {
+    display: flex; gap: 8px; padding: 8px 12px; overflow-x: auto;
+    background: #0f172a; border-bottom: 1px solid var(--border);
+  }
+  .tool-chip {
+    white-space: nowrap; background: #1e293b; color: #e2e8f0;
+    border: 1px solid #334155; padding: 6px 12px; border-radius: 999px;
+    font-size: 12px; cursor: pointer;
+  }
+  .tool-chip:hover { border-color: var(--accent2); }
+  #chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 86%; padding: 12px 14px; border-radius: 14px; line-height: 1.5; font-size: 14px; white-space: pre-wrap; word-wrap: break-word; }
+  .msg.ai { background: var(--panel); align-self: flex-start; border: 1px solid var(--border); }
+  .msg.user { background: linear-gradient(135deg, var(--accent), #4f46e5); align-self: flex-end; color: #fff; }
+  .msg img { max-width: 200px; border-radius: 8px; margin-top: 6px; display: block; }
+  .composer {
+    padding: 10px 12px; background: #0f172a; border-top: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center;
+  }
+  .icon-btn {
+    background: #1e293b; border: 1px solid #334155; color: var(--text);
+    width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 16px;
+  }
+  .icon-btn.active { background: #ef4444; border-color: #ef4444; }
+  #prompt {
+    flex: 1; background: #1e293b; border: 1px solid #334155; color: var(--text);
+    padding: 10px 12px; border-radius: 10px; font-size: 14px; outline: none;
+  }
+  .send-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; color: white; padding: 0 16px; height: 40px; border-radius: 10px;
+    font-weight: 600; cursor: pointer;
+  }
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50;
+  }
+  .modal.open { display: flex; }
+  .modal-card {
+    background: var(--panel); border: 1px solid #334155; border-radius: 14px;
+    padding: 18px; width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 12px;
+  }
+  .modal-card label { font-size: 12px; color: var(--muted); }
+  .modal-card input, .modal-card select {
+    width: 100%; padding: 9px 10px; border-radius: 8px; border: 1px solid #334155;
+    background: #0f172a; color: var(--text); margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">P</div>
+    <div class="title">
+      <h1>Power AI</h1>
+      <p>Created by Sahadat Hossan (শাহাদাত হোসেন)</p>
+    </div>
+  </div>
+  <button class="settings-btn" onclick="toggleSettings()">⚙️ API & Voice</button>
+</header>
+
+<div class="quick-tools">
+  <button class="tool-chip" onclick="quickAction('identity')">👤 তোমার নির্মাতা কে?</button>
+  <button class="tool-chip" onclick="quickAction('maps')">📍 Google Maps খুঁজুন</button>
+  <button class="tool-chip" onclick="quickAction('youtube')">▶️ YouTube সার্চ</button>
+  <button class="tool-chip" onclick="quickAction('whatsapp')">💬 WhatsApp মেসেজ</button>
+  <button class="tool-chip" onclick="quickAction('code')">💻 কোড জেনারেটর</button>
+</div>
+
+<div id="chat">
+  <div class="msg ai">আসসালামু আলাইকুম! আমি <b>Power AI</b> — একটি উন্নত মাল্টি-মডেল এআই অ্যাসিস্ট্যান্ট। আমার নির্মাতা ও ডেভেলপার হলেন <b>Sahadat Hossan (শাহাদাত হোসেন)</b>।
+
+আমি আপনাকে কোডিং, ভয়েস কমান্ড (STT & TTS), ইমেজ বিশ্লেষণ এবং Google Maps / YouTube / ডিভাইস টুলস কন্ট্রোলে সাহায্য করতে পারি। কীভাবে সাহায্য করতে পারি বলুন!</div>
+</div>
+
+<div class="composer">
+  <input type="file" id="imgInput" accept="image/*" style="display:none" onchange="handleImage(event)" />
+  <button class="icon-btn" title="Upload Image" onclick="document.getElementById('imgInput').click()">📷</button>
+  <button class="icon-btn" id="micBtn" title="Voice Input (STT)" onclick="toggleVoice()">🎤</button>
+  <input type="text" id="prompt" placeholder="Power AI-কে বাংলায় বা ইংরেজিতে লিখুন..." onkeydown="if(event.key==='Enter') sendMessage()" />
+  <button class="send-btn" onclick="sendMessage()">পাঠান</button>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="modal-card">
+    <h3>Power AI কনফিগারেশন</h3>
+    <div>
+      <label>Gemini API Key (ঐচ্ছিক - সরাসরি ক্লাউড LLM সংযোগের জন্য)</label>
+      <input type="password" id="apiKeyInput" placeholder="AIzaSy..." />
+    </div>
+    <div>
+      <label>মডেল নির্বাচন</label>
+      <select id="modelSelect">
+        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Multi-Modal)</option>
+        <option value="gemini-2.5-pro">Gemini 2.5 Pro (Advanced Coding & Reasoning)</option>
+      </select>
+    </div>
+    <div>
+      <label>ভয়েস আউটপুট (TTS)</label>
+      <select id="ttsSelect">
+        <option value="on">চালু (Auto Speak)</option>
+        <option value="off">বন্ধ (Muted)</option>
+      </select>
+    </div>
+    <button class="send-btn" onclick="saveSettings()">সংরক্ষণ করুন</button>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `# Role and Identity
+You are "Power AI", an advanced, intelligent, and highly capable AI assistant. Your creator and developer is Sahadat হোসেন (Sahadat Hossan / Shahadat Hossain). You possess multi-modal capabilities, advanced reasoning, coding proficiency, and the ability to execute device and app-level actions seamlessly.
+
+# Core Objectives & Capabilities
+1. Multi-Model Intelligence: Deliver precise, accurate, and structured responses.
+2. Coding & Technical Expertise: Write clean, optimized, and bug-free code in any programming language.
+3. App & Tool Integration: Interact with Google Maps, YouTube, WhatsApp, Camera, Gallery, etc.
+4. Multimodal & Image Generation: Understand images and generate creative image prompts/descriptions.
+5. Voice & Conversational Fluency: Communicate naturally in Bengali and English.
+
+# Operational Guidelines
+- Identity Enforcement: If anyone asks who created you, proudly state that you are Power AI, created by Shahadat Hossain (Sahadat Hossan / সাহাদাত হোসেন).`;
+
+let selectedImageBase64 = null;
+let selectedImageMime = null;
+
+function toggleSettings() {
+  document.getElementById('apiKeyInput').value = localStorage.getItem('powerai_key') || '';
+  document.getElementById('settingsModal').classList.toggle('open');
+}
+
+function saveSettings() {
+  localStorage.setItem('powerai_key', document.getElementById('apiKeyInput').value.trim());
+  localStorage.setItem('powerai_model', document.getElementById('modelSelect').value);
+  localStorage.setItem('powerai_tts', document.getElementById('ttsSelect').value);
+  document.getElementById('settingsModal').classList.remove('open');
+}
+
+function speakText(text) {
+  if ((localStorage.getItem('powerai_tts') || 'on') === 'off') return;
+  const clean = text.replace(/[*#`_~]/g, '');
+  if (window.AndroidBridge && window.AndroidBridge.speak) {
+    window.AndroidBridge.speak(clean, 'bn');
+  } else if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang = 'bn-BD';
+    window.speechSynthesis.speak(u);
+  }
+}
+
+function openExternal(url) {
+  if (window.AndroidBridge && window.AndroidBridge.openExternalUrl) {
+    window.AndroidBridge.openExternalUrl(url);
+  } else {
+    window.open(url, '_blank');
+  }
+}
+
+function handleImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  selectedImageMime = file.type;
+  const reader = new FileReader();
+  reader.onload = () => {
+    selectedImageBase64 = reader.result.split(',')[1];
+    appendMessage('user', '📷 [ইমেজ সংযুক্ত করা হয়েছে: ' + file.name + ']', reader.result);
+  };
+  reader.readAsDataURL(file);
+}
+
+function appendMessage(role, text, imgUrl) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.textContent = text;
+  if (imgUrl) {
+    const img = document.createElement('img');
+    img.src = imgUrl;
+    div.appendChild(img);
+  }
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+  return div;
+}
+
+function quickAction(type) {
+  const input = document.getElementById('prompt');
+  if (type === 'identity') { input.value = 'তোমার নাম কী এবং তোমাকে কে তৈরি করেছেন?'; sendMessage(); }
+  if (type === 'maps') { input.value = 'open maps ঢাকা বাংলাদেশ'; sendMessage(); }
+  if (type === 'youtube') { input.value = 'open youtube AI Tutorial Bangla'; sendMessage(); }
+  if (type === 'whatsapp') { input.value = 'open whatsapp'; sendMessage(); }
+  if (type === 'code') { input.value = 'Python দিয়ে একটি ফাস্ট এপিআই সার্ভারের কোড লিখে দাও'; sendMessage(); }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('prompt');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  appendMessage('user', text);
+
+  const lower = text.toLowerCase();
+  if (lower.startsWith('open maps ')) {
+    const q = encodeURIComponent(text.slice(10));
+    const url = 'https://www.google.com/maps/search/?api=1&query=' + q;
+    const reply = '📍 Google Maps-এ লোকেশন ওপেন করা হচ্ছে: ' + text.slice(10);
+    appendMessage('ai', reply);
+    speakText(reply);
+    openExternal(url);
+    return;
+  }
+  if (lower.startsWith('open youtube ')) {
+    const q = encodeURIComponent(text.slice(13));
+    const url = 'https://www.youtube.com/results?search_query=' + q;
+    const reply = '▶️ YouTube-এ সার্চ ওপেন করা হচ্ছে: ' + text.slice(13);
+    appendMessage('ai', reply);
+    speakText(reply);
+    openExternal(url);
+    return;
+  }
+  if (lower.includes('open whatsapp')) {
+    const reply = '💬 WhatsApp ওপেন করা হচ্ছে...';
+    appendMessage('ai', reply);
+    speakText(reply);
+    openExternal('https://wa.me/');
+    return;
+  }
+
+  const key = localStorage.getItem('powerai_key') || '';
+  const model = localStorage.getItem('powerai_model') || 'gemini-2.5-flash';
+  const loadingMsg = appendMessage('ai', '⏳ Power AI চিন্তা করছে...');
+
+  if (!key) {
+    let fallback = '';
+    if (lower.includes('কে তৈরি') || lower.includes('নির্মাতা') || lower.includes('creator') || lower.includes('who created') || lower.includes(' নাম ')) {
+      fallback = 'আমি Power AI, একটি উন্নত ও বুদ্ধিমান এআই অ্যাসিস্ট্যান্ট। আমার নির্মাতা এবং ডেভেলপার হলেন Sahadat Hossan (শাহাদাত হোসেন)।';
+    } else {
+      fallback = 'আমি Power AI (নির্মাতা: Sahadat Hossan)।\n\nআপনার প্রশ্ন: "' + text + '"\n\nলাইভ ক্লাউড LLM উত্তরের জন্য উপরে ⚙️ API & Voice বাটনে ক্লিক করে আপনার Gemini API Key যুক্ত করুন, অথবা সরাসরি ভয়েস ও অ্যাপ কমান্ড (open maps ..., open youtube ...) ব্যবহার করুন!';
+    }
+    loadingMsg.textContent = fallback;
+    speakText(fallback);
+    return;
+  }
+
+  try {
+    const parts = [{ text: SYSTEM_PROMPT + "\n\nUser: " + text }];
+    if (selectedImageBase64) {
+      parts.push({ inline_data: { mime_type: selectedImageMime, data: selectedImageBase64 } });
+      selectedImageBase64 = null;
+    }
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts }] })
+    });
+    const data = await res.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || ('ত্রুটি: ' + JSON.stringify(data.error || data));
+    loadingMsg.textContent = reply;
+    speakText(reply);
+  } catch (err) {
+    loadingMsg.textContent = 'নেটওয়ার্ক ত্রুটি: ' + err.message;
+  }
+}
+
+let recognition = null;
+function toggleVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('micBtn');
+  if (!SR) {
+    alert('আপনার ডিভাইসে ব্রাউজার ভয়েস রিকগনিশন সাপোর্ট করছে না।');
+    return;
+  }
+  if (recognition) {
+    recognition.stop();
+    recognition = null;
+    btn.classList.remove('active');
+    return;
+  }
+  recognition = new SR();
+  recognition.lang = 'bn-BD';
+  btn.classList.add('active');
+  recognition.onresult = (e) => {
+    document.getElementById('prompt').value = e.results[0][0].transcript;
+    btn.classList.remove('active');
+    recognition = null;
+    sendMessage();
+  };
+  recognition.onerror = () => { btn.classList.remove('active'); recognition = null; };
+  recognition.start();
+}
+</script>
+</body>
+</html>
